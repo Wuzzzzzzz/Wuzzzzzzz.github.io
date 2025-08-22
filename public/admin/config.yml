@@ -1,0 +1,50 @@
+# 本地运行时用本地后端，不需要登录/OAuth
+local_backend: true
+
+# 线上部署后可改为 git-gateway（Netlify）或 github（GitHub OAuth）
+backend:
+  name: git-gateway
+  branch: main
+
+# 全局媒体兜底目录（例如你在“页面”里插图时使用）
+media_folder: "public/uploads"
+public_folder: "/uploads"
+
+# 文章集合：直接操作 Markdown
+collections:
+  - name: "posts"
+    label: "文章"
+    folder: "src/content/posts"
+    create: true
+    format: "frontmatter"
+    extension: "md"
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    path: "{{year}}/{{slug}}/index"
+    media_folder: "images"
+    public_folder: "./images"
+    editor: { preview: false }
+    fields:
+      - { name: "title", label: "标题", widget: "string" }
+
+      - { name: "author", label: "作者", widget: "string", required: false, default: "William" }
+
+      - { name: "published", label: "发布日期", widget: "datetime", format: "YYYY-MM-DD", time_format: false }
+      - { name: "updated", label: "更新日期", widget: "datetime", format: "YYYY-MM-DD", time_format: false, required: false }
+      - { name: "draft", label: "草稿", widget: "boolean", default: false, required: false }
+      - { name: "description", label: "摘要", widget: "text", required: false }
+      - { name: "image", label: "封面图", widget: "image", required: false }
+
+      - label: "分类"
+        name: "category"
+        widget: "select"
+        options:
+          - "党国盛世"
+          - "奇文"
+          - "历史返寻味"
+          - "实用工具"
+          - "学习"
+          - "笔记"
+        default: ""
+
+      - { name: "tags", label: "标签", widget: "list", default: [] }
+      - { label: "正文", name: "body", widget: "markdown" }
