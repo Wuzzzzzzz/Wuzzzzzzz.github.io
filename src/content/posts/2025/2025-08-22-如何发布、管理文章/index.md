@@ -2,7 +2,7 @@
 title: 如何发布、管理文章
 author: William
 published: 2025-08-22
-updated: 2025-08-22
+updated: 2025-08-23
 draft: false
 description: ""
 image: images/home.png
@@ -27,7 +27,7 @@ pnpm dev
 ```
 
 ```
-npx decap-serve
+npx decap-server
 ```
 
 #### 1.2 打开后台管理页面
@@ -40,7 +40,7 @@ http://localhost:4321/admin/
 
 完成填写后，点击 **Save** 按钮。如果文章准备好发布，取消勾选 **Draft**，然后点击 **Publish**，即可将文章发布到网站上。
 
-## 三、通过命令行管理文章
+# 三、通过命令行管理文章
 
 ### 2.1 新建文章
 
@@ -56,18 +56,16 @@ pnpm new-post my-first-post
 
 然后你可以直接打开该文件夹，编辑 `index.md`，填写文章的 `frontmatter`（如标题、分类、标签、作者等），并添加文章内容。
 
-
 ### 2.2 编辑现有文章
 
 在创建文章后，你可以直接编辑位于 `src/content/posts/` 目录下的 Markdown 文件。文章的元数据（`frontmatter`）包括以下字段：
- ** title**：文章标题
- ** published**：发布日期（格式：YYYY-MM-DD）
- ** updated**：文章更新日期（格式：YYYY-MM-DD，非必填）
- ** category**：文章分类（例如：生活、工作等）
- ** tags**：文章标签（例如：学习、技术等）
- ** author**：作者（通常由全站配置读取，也可以自定义）
+  **title**：文章标题
+  **published**：发布日期（格式：YYYY-MM-DD）
+  **updated**：文章更新日期（格式：YYYY-MM-DD，非必填）
+  **category**：文章分类（例如：生活、工作等）
+  **tags**：文章标签（例如：学习、技术等）
+  **author**：作者（通常由全站配置读取，也可以自定义）
 例如，文章的 `index.md` 文件内容：
-
 
 ```
 ---
@@ -80,18 +78,13 @@ tags:
 author: "William"
 ---
 这里是文章正文，支持Markdown语法！
-
 ```
 
-### 
 **2.3 运行本地开发服务器查看文章**
-
-
 
 访问 `http://localhost:4321/` 即可查看文章内容。
 
-
-## 四、更新文章
+# 四、更新文章
 
 ### 4.1 修改文章内容
 
@@ -100,3 +93,11 @@ author: "William"
 ### 4.2 文章更新后发布
 
 修改完文章后，重新保存，点击 **Publish** 按钮，文章就会更新到网站上。
+
+### 4.3 同步至GitHub
+
+```
+git add -A && git commit -m "what you have changed" && git push
+```
+
+将引号内的内容改为修改内容，并提交代码即可推送。
