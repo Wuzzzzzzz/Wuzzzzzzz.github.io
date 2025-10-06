@@ -1,19 +1,37 @@
-# 本地运行时用本地后端，不需要登录/OAuth
+# ====================================
+# Decap CMS 配置文件 - 增强版
+# ====================================
+
+# 本地开发模式（需要运行 npx decap-server）
 local_backend: true
 
-# 线上部署后可改为 git-gateway（Netlify）或 github（GitHub OAuth）
+# 后端配置（部署到 Cloudflare Pages 后使用）
 backend:
   name: git-gateway
   branch: main
 
-# 全局媒体兜底目录（例如你在“页面”里插图时使用）
+# 媒体文件配置
 media_folder: "public/uploads"
 public_folder: "/uploads"
 
-# 文章集合：直接操作 Markdown
+# 本地化设置
+locale: 'zh_Hans'
+
+# 编辑器设置
+editor:
+  preview: true
+
+# Logo 自定义（可选）
+# logo_url: /logo.png
+
+# 集合配置
 collections:
+  # ====================================
+  # 文章管理
+  # ====================================
   - name: "posts"
-    label: "文章"
+    label: "📝 文章"
+    label_singular: "文章"
     folder: "src/content/posts"
     create: true
     format: "frontmatter"
@@ -22,29 +40,232 @@ collections:
     path: "{{year}}/{{slug}}/index"
     media_folder: "images"
     public_folder: "./images"
-    editor: { preview: false }
+    summary: "{{title}} - {{category}} - {{published}}"
+    sortable_fields: ['published', 'title', 'category']
+    view_filters:
+      - label: "草稿"
+        field: draft
+        pattern: true
+      - label: "已发布"
+        field: draft
+        pattern: false
+    view_groups:
+      - label: "分类"
+        field: category
+      - label: "年份"
+        field: published
+        pattern: \d{4}
+    
     fields:
-      - { name: "title", label: "标题", widget: "string" }
+      # 基础信息
+      - label: "标题"
+        name: "title"
+        widget: "string"
+        required: true
+        hint: "文章标题，会显示在页面顶部和搜索结果中"
 
-      - { name: "author", label: "作者", widget: "string", required: false, default: "William" }
+      - label: "作者"
+        name: "author"
+        widget: "string"
+        default: "William"
+        required: false
 
-      - { name: "published", label: "发布日期", widget: "datetime", format: "YYYY-MM-DD", time_format: false }
-      - { name: "updated", label: "更新日期", widget: "datetime", format: "YYYY-MM-DD", time_format: false, required: false }
-      - { name: "draft", label: "草稿", widget: "boolean", default: false, required: false }
-      - { name: "description", label: "摘要", widget: "text", required: false }
-      - { name: "image", label: "封面图", widget: "image", required: false }
+      - label: "发布日期"
+        name: "published"
+        widget: "datetime"
+        format: "YYYY-MM-DD"
+        date_format: "YYYY-MM-DD"
+        time_format: false
+        required: true
+        default: ""
 
+      - label: "更新日期"
+        name: "updated"
+        widget: "datetime"
+        format: "YYYY-MM-DD"
+        date_format: "YYYY-MM-DD"
+        time_format: false
+        required: false
+        hint: "文章最后更新时间，可选"
+
+      - label: "草稿状态"
+        name: "draft"
+        widget: "boolean"
+        default: false
+        required: false
+        hint: "开启后文章不会在网站上显示"
+
+      # SEO 和摘要
+      - label: "文章摘要"
+        name: "description"
+        widget: "text"
+        required: false
+        hint: "150-160字符，会显示在搜索结果和社交分享中"
+        pattern: ['^.{0,200}$', "摘要建议不超过200字符"]
+
+      - label: "封面图"
+        name: "image"
+        widget: "image"
+        required: false
+        hint: "推荐尺寸: 1200x630px，用于社交分享和文章头图"
+        media_library:
+          config:
+            max_file_size: 2048000
+
+      - label: "图片描述 (Alt Text)"
+        name: "imageAlt"
+        widget: "string"
+        required: false
+        hint: "用于 SEO 和无障碍访问"
+
+      # 分类和标签
       - label: "分类"
         name: "category"
         widget: "select"
+        required: false
         options:
-          - "党国盛世"
-          - "奇文"
-          - "历史返寻味"
-          - "实用工具"
-          - "学习"
-          - "笔记"
-        default: ""
+          - label: "🏛️ 党国盛世"
+            value: "党国盛世"
+          - label: "📰 奇文"
+            value: "奇文"
+          - label: "📜 历史返寻味"
+            value: "历史返寻味"
+          - label: "🔧 实用工具"
+            value: "实用工具"
+          - label: "📚 学习"
+            value: "学习"
+          - label: "📝 笔记"
+            value: "笔记"
+          - label: "💭 随笔"
+            value: "随笔"
+          - label: "🎨 设计"
+            value: "设计"
+        hint: "选择一个主要分类"
 
-      - { name: "tags", label: "标签", widget: "list", default: [] }
-      - { label: "正文", name: "body", widget: "markdown" }
+      - label: "标签"
+        name: "tags"
+        widget: "list"
+        required: false
+        default: []
+        hint: "输入后按回车添加，最多建议 5 个标签"
+        max: 10
+        min: 0
+
+      # 高级选项
+      - label: "🎯 高级选项"
+        name: "advanced"
+        widget: "object"
+        collapsed: true
+        required: false
+        fields:
+          - label: "自定义 URL 路径"
+            name: "slug"
+            widget: "string"
+            required: false
+            hint: "留空则自动生成"
+          
+          - label: "置顶文章"
+            name: "featured"
+            widget: "boolean"
+            default: false
+            hint: "置顶显示在首页"
+          
+          - label: "允许评论"
+            name: "comments"
+            widget: "boolean"
+            default: true
+            hint: "是否开启评论功能"
+          
+          - label: "阅读时长（分钟）"
+            name: "readingTime"
+            widget: "number"
+            value_type: "int"
+            min: 1
+            max: 180
+            required: false
+            hint: "留空则自动计算"
+          
+          - label: "字数统计"
+            name: "wordCount"
+            widget: "number"
+            value_type: "int"
+            required: false
+            hint: "留空则自动计算"
+
+          - label: "相关文章"
+            name: "related"
+            widget: "list"
+            required: false
+            hint: "输入相关文章的文件名"
+
+      # 正文内容
+      - label: "📄 正文内容"
+        name: "body"
+        widget: "markdown"
+        required: true
+        hint: "支持 Markdown 语法，可插入图片、代码块等"
+        buttons:
+          - bold
+          - italic
+          - code
+          - link
+          - heading-two
+          - heading-three
+          - heading-four
+          - quote
+          - bulleted-list
+          - numbered-list
+        editor_components:
+          - image
+          - code-block
+
+  # ====================================
+  # 页面管理（关于、友链等）
+  # ====================================
+  - name: "pages"
+    label: "📄 页面"
+    label_singular: "页面"
+    folder: "src/content/pages"
+    create: true
+    format: "frontmatter"
+    extension: "md"
+    slug: "{{slug}}"
+    
+    fields:
+      - {label: "标题", name: "title", widget: "string"}
+      - {label: "发布日期", name: "published", widget: "datetime", format: "YYYY-MM-DD", time_format: false}
+      - {label: "描述", name: "description", widget: "text", required: false}
+      - {label: "正文", name: "body", widget: "markdown"}
+
+  # ====================================
+  # 站点设置（单例配置）
+  # ====================================
+  - name: "settings"
+    label: "⚙️ 站点设置"
+    files:
+      - label: "网站配置"
+        name: "site"
+        file: "src/config/site.json"
+        fields:
+          - {label: "网站标题", name: "title", widget: "string"}
+          - {label: "网站描述", name: "description", widget: "text"}
+          - {label: "网站 URL", name: "url", widget: "string"}
+          - {label: "作者", name: "author", widget: "string"}
+          - {label: "作者邮箱", name: "email", widget: "string", required: false}
+          - {label: "社交链接", name: "social", widget: "object", fields: [
+              {label: "GitHub", name: "github", widget: "string", required: false},
+              {label: "Twitter", name: "twitter", widget: "string", required: false},
+              {label: "微博", name: "weibo", widget: "string", required: false}
+            ]}
+
+      - label: "导航菜单"
+        name: "navigation"
+        file: "src/config/navigation.json"
+        fields:
+          - label: "主导航"
+            name: "main"
+            widget: "list"
+            fields:
+              - {label: "名称", name: "name", widget: "string"}
+              - {label: "链接", name: "url", widget: "string"}
+              - {label: "是否在新窗口打开", name: "external", widget: "boolean", default: false, required: false}

@@ -13,7 +13,6 @@ import ImageWrapper from "../../components/misc/ImageWrapper.astro";
 import PostMetadata from "../../components/PostMeta.astro";
 import { profileConfig, siteConfig } from "../../config";
 import { formatDateToYYYYMMDD } from "../../utils/date-utils";
-import { profileConfig } from "@/config";
 
 export async function getStaticPaths() {
 	const blogEntries = await getSortedPosts();
@@ -28,6 +27,9 @@ const { Content, headings } = await entry.render();
 
 const { remarkPluginFrontmatter } = await entry.render();
 
+// 获取文章作者，优先使用文章中定义的 author，否则使用默认的 profileConfig.name
+const postAuthor = entry.data.author || profileConfig.name;
+
 const jsonLd = {
 	"@context": "https://schema.org",
 	"@type": "BlogPosting",
@@ -36,7 +38,7 @@ const jsonLd = {
 	keywords: entry.data.tags,
 	author: {
 		"@type": "Person",
-		name: profileConfig.name,
+		name: postAuthor,  // 使用动态获取的作者
 		url: Astro.site,
 	},
 	datePublished: formatDateToYYYYMMDD(entry.data.published),
@@ -93,6 +95,15 @@ const jsonLd = {
                         tags={entry.data.tags}
                         category={entry.data.category}
                 ></PostMetadata>
+                
+                <!-- 作者信息显示 -->
+                {postAuthor && (
+                    <div class="flex items-center gap-2 text-black/50 dark:text-white/50 text-sm mb-4">
+                        <Icon name="material-symbols:person-outline-rounded" class="text-lg" />
+                        <span>作者：{postAuthor}</span>
+                    </div>
+                )}
+                
                 {!entry.data.image && <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mb-5"></div>}
             </div>
 
@@ -107,7 +118,7 @@ const jsonLd = {
                 <Content />
             </Markdown>
 
-            {licenseConfig.enable && <License title={entry.data.title} slug={entry.slug} pubDate={entry.data.published} class="mb-6 rounded-xl license-container onload-animation"></License>}
+            {licenseConfig.enable && <License title={entry.data.title} slug={entry.slug} pubDate={entry.data.published} author={postAuthor} class="mb-6 rounded-xl license-container onload-animation"></License>}
 
         </div>
     </div>

@@ -3,9 +3,171 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>内容管理</title>
+    <meta name="robots" content="noindex" />
+    <title>内容管理系统</title>
+    
+    <style>
+      /* 加载动画 */
+      #loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease-out;
+      }
+      
+      #loading.loaded {
+        opacity: 0;
+        pointer-events: none;
+      }
+      
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      
+      .loading-text {
+        color: white;
+        margin-top: 20px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 16px;
+        font-weight: 500;
+      }
+      
+      /* CMS 自定义样式 */
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      }
+    </style>
   </head>
   <body>
+    <!-- 加载提示 -->
+    <div id="loading">
+      <div class="spinner"></div>
+      <div class="loading-text">正在加载内容管理系统...</div>
+    </div>
+
+    <!-- Decap CMS -->
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    
+    <script>
+      // 等待 CMS 加载完成后隐藏加载动画
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          document.getElementById('loading').classList.add('loaded');
+        }, 500);
+      });
+
+      // CMS 自定义配置
+      if (window.CMS) {
+        // 注册自定义预览样式（可选）
+        CMS.registerPreviewStyle('/styles/preview.css');
+        
+        // 自定义编辑器组件（示例：提示框）
+        CMS.registerEditorComponent({
+          id: "tip",
+          label: "提示框",
+          fields: [
+            {
+              name: 'type',
+              label: '类型',
+              widget: 'select',
+              options: ['info', 'warning', 'success', 'error'],
+              default: 'info'
+            },
+            {
+              name: 'content',
+              label: '内容',
+              widget: 'text'
+            }
+          ],
+          pattern: /^:::(\w+)\s*\n([\s\S]*?)\n:::$/,
+          fromBlock: function(match) {
+            return {
+              type: match[1],
+              content: match[2]
+            };
+          },
+          toBlock: function(obj) {
+            return `:::${obj.type}\n${obj.content}\n:::`;
+          },
+          toPreview: function(obj) {
+            const typeColors = {
+              info: '#3b82f6',
+              warning: '#f59e0b',
+              success: '#10b981',
+              error: '#ef4444'
+            };
+            const typeIcons = {
+              info: 'ℹ️',
+              warning: '⚠️',
+              success: '✅',
+              error: '❌'
+            };
+            return `
+              <div style="
+                padding: 16px;
+                margin: 16px 0;
+                border-left: 4px solid ${typeColors[obj.type] || typeColors.info};
+                background-color: ${typeColors[obj.type] || typeColors.info}15;
+                border-radius: 4px;
+              ">
+                <strong>${typeIcons[obj.type] || typeIcons.info} ${obj.type.toUpperCase()}</strong>
+                <p style="margin: 8px 0 0 0;">${obj.content}</p>
+              </div>
+            `;
+          }
+        });
+
+        // 代码块组件
+        CMS.registerEditorComponent({
+          id: "code",
+          label: "代码块",
+          fields: [
+            {
+              name: 'lang',
+              label: '语言',
+              widget: 'select',
+              options: ['javascript', 'typescript', 'python', 'bash', 'html', 'css', 'json', 'yaml', 'markdown'],
+              default: 'javascript'
+            },
+            {
+              name: 'code',
+              label: '代码',
+              widget: 'text'
+            }
+          ],
+          pattern: /^```(\w+)\n([\s\S]*?)\n```$/,
+          fromBlock: function(match) {
+            return {
+              lang: match[1],
+              code: match[2]
+            };
+          },
+          toBlock: function(obj) {
+            return `\`\`\`${obj.lang}\n${obj.code}\n\`\`\``;
+          },
+          toPreview: function(obj) {
+            return `<pre style="background: #282c34; color: #abb2bf; padding: 16px; border-radius: 8px; overflow-x: auto;"><code>${obj.code}</code></pre>`;
+          }
+        });
+      }
+    </script>
   </body>
 </html>
